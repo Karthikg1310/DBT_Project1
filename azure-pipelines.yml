@@ -15,25 +15,24 @@ jobs:
   steps:
   - checkout: self
 
-  - powershell: |
-      # Download and install Miniconda
-      Invoke-WebRequest -Uri https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe -OutFile miniconda.exe
-      Start-Process -Wait -FilePath .\miniconda.exe -ArgumentList '/S', '/D=C:\Miniconda3'
-      Remove-Item -Path miniconda.exe
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'
+      addToPath: true
 
-      # Install dbt
-      & C:\Miniconda3\Scripts\conda.exe install -y -c conda-forge dbt
-      & C:\Miniconda3\Scripts\conda.exe install -y -c conda-forge dbt-snowflake
+  - script: |
+      pip install dbt
+      pip install dbt-snowflake
     displayName: 'Install dbt and dependencies'
 
   - script: |
-      C:\Miniconda3\Scripts\dbt.exe deps --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
+      python -m dbt deps --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
     displayName: 'Install dbt dependencies'
 
   - script: |
-      C:\Miniconda3\Scripts\dbt.exe run --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
+      python -m dbt run --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
     displayName: 'Run dbt models'
 
   - script: |
-      C:\Miniconda3\Scripts\dbt.exe test --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
+      python -m dbt test --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
     displayName: 'Run dbt tests'
