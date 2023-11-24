@@ -19,7 +19,14 @@ jobs:
       Invoke-WebRequest -Uri https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe -OutFile miniconda.exe
       Start-Process -Wait -FilePath .\miniconda.exe -ArgumentList '/S', '/D=C:\Miniconda3'
       Remove-Item -Path miniconda.exe
+
+      # Add conda to the PATH
+      $env:PATH += ';C:\Miniconda3;C:\Miniconda3\Scripts;C:\Miniconda3\Library\bin'
+      
+      # Refresh the environment
       RefreshEnv.cmd
+      
+      # Install dbt
       conda install -y -c conda-forge dbt
       conda install -y -c conda-forge dbt-snowflake
     displayName: 'Install dbt and dependencies'
