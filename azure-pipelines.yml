@@ -1,0 +1,37 @@
+trigger:
+- main
+
+schedules:
+- cron: '*/5 * * * *'
+  branches:
+    include:
+    - main
+
+jobs:
+- job: RunDbtModels
+  pool:
+    vmImage: 'windows-latest'  # Change this to 'windows-latest' for Windows
+
+  steps:
+  - checkout: self
+
+  - powershell: |
+      Invoke-WebRequest -Uri https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe -OutFile miniconda.exe
+      Start-Process -Wait -FilePath .\miniconda.exe -ArgumentList '/S', '/D=C:\Miniconda3'
+      Remove-Item -Path miniconda.exe
+      RefreshEnv.cmd
+      conda install -y -c conda-forge dbt
+      conda install -y -c conda-forge dbt-snowflake
+    displayName: 'Install dbt and dependencies'
+
+  - script: |
+      dbt deps --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
+    displayName: 'Install dbt dependencies'
+
+  - script: |
+      dbt run --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
+    displayName: 'Run dbt models'
+
+  - script: |
+      dbt test --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
+    displayName: 'Run dbt tests'
