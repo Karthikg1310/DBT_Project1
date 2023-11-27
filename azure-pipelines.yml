@@ -1,3 +1,5 @@
+YAML Script for DBT:
+
 trigger:
 - main
 
@@ -10,8 +12,8 @@ schedules:
 jobs:
 - job: RunDbtModels
   pool:
-    vmImage: 'windows-latest'
-
+    vmImage: 'ubuntu-latest'
+  
   steps:
   - checkout: self
 
@@ -21,18 +23,19 @@ jobs:
       addToPath: true
 
   - script: |
+      python -m pip install --upgrade pip
       pip install dbt
       pip install dbt-snowflake
     displayName: 'Install dbt and dependencies'
 
   - script: |
-      python -m dbt deps --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
+      dbt deps --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
     displayName: 'Install dbt dependencies'
 
   - script: |
-      python -m dbt run --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
+      dbt run --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
     displayName: 'Run dbt models'
 
   - script: |
-      python -m dbt test --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
+      dbt test --profiles-dir $(Build.Repository.LocalPath)/dfz --project-dir $(Build.Repository.LocalPath)/dfz
     displayName: 'Run dbt tests'
